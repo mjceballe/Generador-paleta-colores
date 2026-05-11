@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Documentación Técnica: Sistema Algorítmico de Color</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body { font-family: system-ui, -apple-system, sans-serif; }
+        code { font-family: 'ui-monospace', 'SFMono-Regular', 'Menlo', 'Monaco', monospace; }
+        .prose h2 { margin-top: 2.5rem; margin-bottom: 1rem; border-bottom: 1px solid #e5e7eb; padding-bottom: 0.5rem; }
+        .prose h3 { margin-top: 1.5rem; margin-bottom: 0.75rem; color: #374151; }
+        .prose p { margin-bottom: 1rem; color: #4b5563; line-height: 1.7; }
+        .prose pre { background-color: #1f2937; color: #f3f4f6; padding: 1rem; border-radius: 0.5rem; overflow-x: auto; margin-bottom: 1.5rem; }
+        .prose ul { list-style-type: disc; padding-left: 1.5rem; margin-bottom: 1.5rem; color: #4b5563; }
+        .prose li { margin-bottom: 0.5rem; }
+        .token { color: #818cf8; font-weight: bold; }
+    </style>
+</head>
+<body class="bg-gray-50 text-gray-900 pb-20">
+
+    <!-- Header -->
+    <header class="bg-white border-b border-gray-200 sticky top-0 z-10 shadow-sm">
+        <div class="max-w-4xl mx-auto px-6 py-4 flex items-center justify-between">
+            <div>
+                <h1 class="text-2xl font-extrabold tracking-tight text-gray-900">Sistema Algorítmico de Color</h1>
+                <p class="text-xs font-semibold text-blue-600 uppercase tracking-widest mt-1">Documentación para Desarrolladores</p>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="max-w-4xl mx-auto px-6 py-10 prose">
+        
+        <p class="text-lg text-gray-600 lead">
+            Este documento detalla las decisiones de diseño y las soluciones en código empleadas para construir el motor dinámico de paletas de color. El sistema soporta escalas secuenciales y categóricas garantizando accesibilidad mediante tokens de diseño.
+        </p>
+
+        <!-- SECCIÓN 1 -->
+        <h2>1. Arquitectura y Espacios de Color</h2>
+        <p>
+            <strong>Decisión de Diseño:</strong> Se optó por una arquitectura híbrida. 
+            El <strong>HSL</strong> se utiliza para las paletas secuenciales por su predictibilidad en luminosidad (L). 
+            El <strong>OKLCH</strong> se utiliza internamente para la rotación de matices (Hue) en paletas cualitativas, ya que es perceptualmente uniforme y evita distorsiones de brillo en diferentes matices.
+        </p>
+
+        <!-- SECCIÓN 2 -->
+        <h2>2. Motor Cualitativo Inteligente (Treemaps)</h2>
+        <p>
+            <strong>Decisión de Diseño:</strong> Rotar el matiz linealmente genera progresiones sintéticas y poco naturales. Utilizamos una matriz de saltos <strong>asimétricos</strong> predefinidos para maximizar la distinción visual entre categorías adyacentes.
+        </p>
+        
+        <pre><code>// Matriz de rotación asimétrica para 8 categorías
+const HUE_OFFSETS_8 = [0, 227, 57, 172, 287, 112, 330, 25];</code></pre>
+
+        <p>
+            Además, implementamos un detector de temperatura cromática en HSL. Si la marca es cálida, el algoritmo busca un punto de inicio análogo hacia el espectro frío (salto de +35°) y viceversa, manteniendo la armonía sin perder contraste.
+        </p>
+        <pre><code>// Compensación análoga inteligente para evitar esquemas mecánicos
+const isWarmBrand = (hIn >= 0 && hIn <= 90) || (hIn >= 300 && hIn <= 360);
+let seedHueTreemap = isWarmBrand ? (seedHue + 35) : (seedHue - 35);</code></pre>
+
+        <!-- SECCIÓN 3 -->
+        <h2>3. Motor Secuencial y Lógica de Datos (Dona)</h2>
+        <p>
+            <strong>Decisión de Diseño:</strong> Para garantizar la legibilidad al reducir la cantidad de datos, el sistema no utiliza los colores de forma lineal (1, 2, 3...), sino que aplica un filtrado selectivo (<em>cherry-picking</em>) para mantener el máximo contraste entre segmentos.
+        </p>
+        
+        <h3>Reglas de asignación por volumen de datos:</h3>
+        <ul>
+            <li><strong>0 datos:</strong> Estado vacío (Gris neutro).</li>
+            <li><strong>1 dato:</strong> Usa exclusivamente el 4to color (Índice 3).</li>
+            <li><strong>2 datos:</strong> Usa el 4to y 5to color (Índices 3, 4).</li>
+            <li><strong>3 datos:</strong> Usa el 1ro, 3ro y 5to color (Índices 0, 2, 4).</li>
+            <li><strong>4 datos:</strong> Usa el 1ro, 4to, 5to y 6to color (Índices 0, 3, 4, 5).</li>
+            <li><strong>5 datos:</strong> Usa el 1ro, 3er, 4to, 5to y 6to color (Índices 0, 2, 3, 4, 5).</li>
+            <li><strong>6 datos:</strong> Usa la escala completa (Índices 0 al 5).</li>
+        </ul>
+
+        <!-- SECCIÓN 4 -->
+        <h2>4. Accesibilidad y Tokens de Diseño</h2>
+        <p>
+            <strong>Decisión de Diseño:</strong> La legibilidad del texto sobre los bloques de color se resuelve mediante el cálculo de <strong>Luminancia Relativa</strong> (WCAG 2.1). En lugar de usar valores fijos, el sistema mapea el resultado a tokens de diseño semánticos.
+        </p>
+        <p>
+            El umbral crítico es <strong>0.179</strong>. Este valor determina matemáticamente si el ojo humano requiere un tono claro u oscuro para leer el contenido.
+        </p>
+        
+        <div class="bg-gray-100 p-4 rounded-lg mb-6 border-l-4 border-indigo-500">
+            <ul class="m-0 space-y-2">
+                <li>Si L > 0.179: Aplicar token <span class="token">text/body</span> (Contraste oscuro).</li>
+                <li>Si L ≤ 0.179: Aplicar token <span class="token">text/on-action</span> (Contraste claro/blanco).</li>
+            </ul>
+        </div>
+
+        <pre><code>function getAccessibleTextColor(hex) {
+    const L = calculateRelativeLuminance(hex);
+    // Mapeo de lógica a Tokens de Diseño
+    return L > 0.179 ? "text/body" : "text/on-action";
+}</code></pre>
+
+    </main>
+
+    <footer class="border-t border-gray-200 mt-10 py-6 text-center text-sm text-gray-500">
+        &copy; Multi Design System. Documentación simplificada para ingeniería de producto.
+    </footer>
+
+</body>
+</html>
