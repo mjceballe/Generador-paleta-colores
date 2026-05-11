@@ -1,0 +1,818 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Visualización de Datos - Multi Design System</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        }
+        .color-swatch {
+            transition: transform 0.2s;
+        }
+        .color-swatch:hover {
+            transform: scale(1.05);
+        }
+        /* Ocultar flechas en inputs numéricos para ahorrar espacio */
+        input[type=number]::-webkit-inner-spin-button, 
+        input[type=number]::-webkit-outer-spin-button { 
+            -webkit-appearance: none; 
+            margin: 0; 
+        }
+        input[type=number] {
+            -moz-appearance: textfield;
+        }
+        /* Ocultar scrollbar en la lista de presets */
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 min-h-screen p-4 md:p-8 pb-48 lg:pb-32">
+
+    <div class="max-w-[90rem] mx-auto">
+        <header class="mb-8">
+            <h1 class="text-3xl font-extrabold text-gray-900 tracking-tight">Arquitectura de Color de Datos</h1>
+            <p class="text-gray-600 mt-2">Multi Design System • Motor Secuencial para Dona y Cualitativo Inteligente para Treemap.</p>
+        </header>
+
+        <!-- Barra de Controles Inferior (Edge-to-Edge) -->
+        <div class="fixed bottom-0 left-0 w-full z-50 bg-white/95 backdrop-blur-xl border-t border-gray-200/80 shadow-[0_-10px_40px_rgba(0,0,0,0.05)]">
+            <div class="max-w-[90rem] mx-auto px-4 py-2 md:px-8 relative">
+                
+                <!-- Warning Failsafe Flotante -->
+                <div id="failsafe-warning" class="hidden absolute -top-12 left-1/2 -translate-x-1/2 px-4 py-2 bg-orange-100 border border-orange-300 text-orange-800 rounded-full text-xs font-bold flex items-center shadow-lg whitespace-nowrap transition-all">
+                    <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+                    Color acromático. Semilla forzada a 0°.
+                </div>
+
+                <!-- Fila Única de Controles -->
+                <div class="flex flex-col lg:flex-row gap-3 lg:gap-4 items-center justify-between w-full">
+                    
+                    <!-- 1. HSL Original -->
+                    <div class="flex items-center justify-between w-full lg:w-auto bg-gray-50 p-2 rounded-xl border border-gray-200 shadow-sm shrink-0">
+                        <div class="flex flex-col items-start ml-2 mr-4">
+                            <span class="text-[10px] font-black text-gray-400 uppercase tracking-widest leading-tight">Color de<br>Marca</span>
+                            <span id="brand-temp-badge" class="mt-1 w-max text-[8px] px-1.5 py-0.5 rounded font-bold uppercase tracking-wider"></span>
+                        </div>
+                        <div class="flex gap-2">
+                            <div class="flex flex-col items-center">
+                                <label class="text-[9px] text-gray-500 font-bold mb-0.5">HUE (H)</label>
+                                <input id="in-h" type="number" min="0" max="360" value="227" class="w-14 rounded-lg border-gray-300 border p-1 focus:ring-2 focus:ring-blue-500 outline-none text-sm font-mono text-center">
+                            </div>
+                            <div class="flex flex-col items-center">
+                                <label class="text-[9px] text-gray-500 font-bold mb-0.5">SAT (S)</label>
+                                <input id="in-s" type="number" min="0" max="100" value="65" class="w-14 rounded-lg border-gray-300 border p-1 focus:ring-2 focus:ring-blue-500 outline-none text-sm font-mono text-center">
+                            </div>
+                            <div class="flex flex-col items-center">
+                                <label class="text-[9px] text-gray-500 font-bold mb-0.5">LUM (L)</label>
+                                <input id="in-l" type="number" min="0" max="100" value="52" class="w-14 rounded-lg border-gray-300 border p-1 focus:ring-2 focus:ring-blue-500 outline-none text-sm font-mono text-center">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 2. Presets de Marca (Centrados) -->
+                    <div class="flex items-center justify-center gap-2.5 overflow-x-auto no-scrollbar py-1 px-2 w-full lg:w-auto">
+                        <button onclick="applyPreset(227, 65, 52)" title="Azul Gallo" class="w-5 h-5 rounded-full border border-gray-300 shadow-sm shrink-0 transition-transform hover:scale-125 hover:shadow-md" style="background-color: hsl(227, 65%, 52%);"></button>
+                        <button onclick="applyPreset(261, 100, 44)" title="Violeta IEB" class="w-5 h-5 rounded-full border border-gray-300 shadow-sm shrink-0 transition-transform hover:scale-125 hover:shadow-md" style="background-color: hsl(261, 100%, 44%);"></button>
+                        <button onclick="applyPreset(26, 7, 44)" title="Neutro Finex" class="w-5 h-5 rounded-full border border-gray-300 shadow-sm shrink-0 transition-transform hover:scale-125 hover:shadow-md" style="background-color: hsl(26, 7%, 44%);"></button>
+                        <button onclick="applyPreset(0, 0, 44)" title="Blanco y Negro" class="w-5 h-5 rounded-full border border-gray-300 shadow-sm shrink-0 transition-transform hover:scale-125 hover:shadow-md" style="background-color: hsl(0, 0%, 44%);"></button>
+                        <button onclick="applyPreset(358, 100, 48)" title="Rojo Coca-Cola" class="w-5 h-5 rounded-full border border-gray-300 shadow-sm shrink-0 transition-transform hover:scale-125 hover:shadow-md" style="background-color: hsl(358, 100%, 48%);"></button>
+                        <button onclick="applyPreset(142, 75, 48)" title="Verde Spotify" class="w-5 h-5 rounded-full border border-gray-300 shadow-sm shrink-0 transition-transform hover:scale-125 hover:shadow-md" style="background-color: hsl(142, 75%, 48%);"></button>
+                        <button onclick="applyPreset(54, 100, 48)" title="Amarillo Mercado Libre" class="w-5 h-5 rounded-full border border-gray-300 shadow-sm shrink-0 transition-transform hover:scale-125 hover:shadow-md" style="background-color: hsl(54, 100%, 48%);"></button>
+                    </div>
+
+                    <!-- Controles Dona -->
+                    <div class="flex items-center justify-between shrink-0 bg-gray-50 p-2 rounded-xl border border-gray-200 shadow-sm">
+                        <span class="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-2 mr-3 leading-tight hidden sm:block">Dona</span>
+                        <div class="flex gap-4">
+                            <div class="flex flex-col items-center">
+                                <label class="text-[9px] text-gray-500 font-bold mb-0.5">DATOS</label>
+                                <input id="in-donut-count" type="number" min="0" max="6" value="6" class="w-14 rounded-lg border-gray-300 border p-1 focus:ring-2 focus:ring-blue-500 outline-none text-xs font-mono text-center">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 3. Constantes Treemap -->
+                    <div class="flex flex-row gap-3 w-full lg:w-auto shrink-0 justify-between lg:justify-end">
+                        <!-- Claro -->
+                        <div class="flex items-center justify-between flex-1 lg:flex-none bg-gray-50 p-2 rounded-xl border border-gray-200 shadow-sm">
+                            <span class="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-2 mr-4 leading-tight hidden sm:block">Treemap<br>Claro</span>
+                            <div class="flex gap-2">
+                                <div class="flex flex-col items-center">
+                                    <label class="text-[9px] text-gray-500 font-bold mb-0.5">LUM (L)</label>
+                                    <input id="in-l-light" type="number" step="0.01" min="0" max="1" value="0.62" class="w-14 rounded-lg border-gray-300 border p-1 focus:ring-2 focus:ring-blue-500 outline-none text-xs font-mono text-center">
+                                </div>
+                                <div class="flex flex-col items-center">
+                                    <label class="text-[9px] text-gray-500 font-bold mb-0.5">CROM (C)</label>
+                                    <input id="in-c-light" type="number" step="0.01" min="0" max="0.4" value="0.12" class="w-14 rounded-lg border-gray-300 border p-1 focus:ring-2 focus:ring-blue-500 outline-none text-xs font-mono text-center">
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Oscuro -->
+                        <div class="flex items-center justify-between flex-1 lg:flex-none bg-[#2b2e36] p-2 rounded-xl border border-[#1e2025] shadow-sm">
+                            <span class="text-[10px] font-black text-gray-500 uppercase tracking-widest ml-2 mr-4 leading-tight hidden sm:block">Treemap<br>Oscuro</span>
+                            <div class="flex gap-2">
+                                <div class="flex flex-col items-center">
+                                    <label class="text-[9px] text-gray-400 font-bold mb-0.5">LUM (L)</label>
+                                    <input id="in-l-dark" type="number" step="0.01" min="0" max="1" value="0.75" class="w-14 rounded-lg bg-[#393C46] text-white border-gray-600 border p-1 focus:ring-2 focus:ring-blue-500 outline-none text-xs font-mono text-center">
+                                </div>
+                                <div class="flex flex-col items-center">
+                                    <label class="text-[9px] text-gray-400 font-bold mb-0.5">CROM (C)</label>
+                                    <input id="in-c-dark" type="number" step="0.01" min="0" max="0.4" value="0.09" class="w-14 rounded-lg bg-[#393C46] text-white border-gray-600 border p-1 focus:ring-2 focus:ring-blue-500 outline-none text-xs font-mono text-center">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <div class="flex flex-col gap-8">
+            
+            <div class="rounded-2xl p-6 md:p-10 shadow-lg bg-white border border-gray-200">
+                <h2 class="text-2xl font-black mb-10 text-gray-800 border-b pb-4">Modo Claro (#FFFFFF)</h2>
+                
+                <div class="flex flex-col lg:flex-row w-full gap-8 mb-16 items-start">
+                    <div class="w-full lg:w-1/3 flex flex-col items-center lg:items-start shrink-0">
+                        <h3 class="text-sm font-bold text-gray-500 uppercase tracking-wider mb-6">Dona Secuencial (6)</h3>
+                        <div id="light-chart-container" class="w-full flex justify-center lg:justify-start"></div>
+                    </div>
+                    <div class="w-full lg:w-2/3">
+                        <div id="light-donut-summary" class="mb-5 p-3 rounded-lg border border-gray-200 bg-gray-50 text-[11px] text-gray-500 font-mono shadow-sm flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2"></div>
+                        <div id="light-list" class="grid grid-cols-1 sm:grid-cols-2 gap-x-4"></div>
+                    </div>
+                </div>
+                
+                <div class="flex flex-col lg:flex-row w-full gap-8 lg:gap-12 items-start">
+                    <!-- Grupo de Treemaps -->
+                    <div class="flex flex-col sm:flex-row gap-8 shrink-0 w-full lg:w-auto justify-center lg:justify-start">
+                        <!-- Treemap 1: Cualitativo (8) -->
+                        <div class="w-48 flex flex-col items-center lg:items-start shrink-0">
+                            <h3 class="text-sm font-bold text-gray-500 uppercase tracking-wider mb-2 text-center lg:text-left">Treemap Cualitativo (8)</h3>
+                            <p class="text-[10px] text-gray-400 mb-4 uppercase tracking-wide">👆 Click para Drill-down</p>
+                            <div id="light-treemap-container" class="w-full flex justify-center lg:justify-start"></div>
+                        </div>
+                        <!-- Treemap 2: Drill-down Secuencial (10) -->
+                        <div class="w-48 flex flex-col items-center lg:items-start shrink-0">
+                            <h3 class="text-sm font-bold text-gray-500 uppercase tracking-wider mb-2 text-center lg:text-left">Drill-Down Secuencial (10)</h3>
+                            <p id="light-drilldown-label" class="text-[10px] text-blue-500 font-bold mb-4 uppercase tracking-wide text-center lg:text-left">Bloque Seleccionado</p>
+                            <div id="light-treemap2-container" class="w-full flex justify-center lg:justify-start"></div>
+                        </div>
+                    </div>
+                    <!-- Leyenda (Aplica al Cualitativo) -->
+                    <div class="w-full lg:flex-1 min-w-0">
+                        <div id="light-treemap-summary" class="mb-5 p-3 rounded-lg border border-gray-200 bg-gray-50 text-[11px] text-gray-500 font-mono shadow-sm flex flex-col xl:flex-row xl:items-center sm:justify-between gap-2 overflow-hidden"></div>
+                        <div id="light-treemap-list" class="grid grid-cols-1 sm:grid-cols-2 gap-x-4"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="rounded-2xl p-6 md:p-10 shadow-lg bg-[#393C46] border border-[#2b2e36]">
+                <h2 class="text-2xl font-black mb-10 text-white border-b border-gray-600 pb-4">Modo Oscuro (#393C46)</h2>
+                
+                <div class="flex flex-col lg:flex-row w-full gap-8 mb-16 items-start">
+                    <div class="w-full lg:w-1/3 flex flex-col items-center lg:items-start shrink-0">
+                        <h3 class="text-sm font-bold text-gray-400 uppercase tracking-wider mb-6">Dona Secuencial (6)</h3>
+                        <div id="dark-chart-container" class="w-full flex justify-center lg:justify-start"></div>
+                    </div>
+                    <div class="w-full lg:w-2/3">
+                        <div id="dark-donut-summary" class="mb-5 p-3 rounded-lg border border-[#1e2025] bg-[#2b2e36] text-[11px] text-gray-400 font-mono shadow-sm flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2"></div>
+                        <div id="dark-list" class="grid grid-cols-1 sm:grid-cols-2 gap-x-4"></div>
+                    </div>
+                </div>
+                
+                <div class="flex flex-col lg:flex-row w-full gap-8 lg:gap-12 items-start">
+                    <!-- Grupo de Treemaps -->
+                    <div class="flex flex-col sm:flex-row gap-8 shrink-0 w-full lg:w-auto justify-center lg:justify-start">
+                        <!-- Treemap 1: Cualitativo (8) -->
+                        <div class="w-48 flex flex-col items-center lg:items-start shrink-0">
+                            <h3 class="text-sm font-bold text-gray-400 uppercase tracking-wider mb-2 text-center lg:text-left">Treemap Cualitativo (8)</h3>
+                            <p class="text-[10px] text-gray-400 opacity-60 mb-4 uppercase tracking-wide">👆 Click para Drill-down</p>
+                            <div id="dark-treemap-container" class="w-full flex justify-center lg:justify-start"></div>
+                        </div>
+                        <!-- Treemap 2: Drill-down Secuencial (10) -->
+                        <div class="w-48 flex flex-col items-center lg:items-start shrink-0">
+                            <h3 class="text-sm font-bold text-gray-400 uppercase tracking-wider mb-2 text-center lg:text-left">Drill-Down Secuencial (10)</h3>
+                            <p id="dark-drilldown-label" class="text-[10px] text-blue-400 font-bold mb-4 uppercase tracking-wide text-center lg:text-left">Bloque Seleccionado</p>
+                            <div id="dark-treemap2-container" class="w-full flex justify-center lg:justify-start"></div>
+                        </div>
+                    </div>
+                    <!-- Leyenda (Aplica al Cualitativo) -->
+                    <div class="w-full lg:flex-1 min-w-0">
+                        <div id="dark-treemap-summary" class="mb-5 p-3 rounded-lg border border-[#1e2025] bg-[#2b2e36] text-[11px] text-gray-400 font-mono shadow-sm flex flex-col xl:flex-row xl:items-center sm:justify-between gap-2 overflow-hidden"></div>
+                        <div id="dark-treemap-list" class="grid grid-cols-1 sm:grid-cols-2 gap-x-4"></div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+        // --- ESTADO GLOBAL (Para interactividad Drill-Down) ---
+        let activeDrillDownIndexLight = 0;
+        let activeDrillDownIndexDark = 0;
+        let latestQualitativeLight = null;
+        let latestQualitativeDark = null;
+
+        // --- MATRICES MATEMÁTICAS INDEPENDIENTES ---
+        // Array cualitativo base (Saltos asimétricos)
+        const HUE_OFFSETS_8 = [0, 227, 57, 172, 287, 112, 330, 25];
+
+        // --- FUNCIONALIDAD PRESETS ---
+        function applyPreset(h, s, l) {
+            document.getElementById('in-h').value = h;
+            document.getElementById('in-s').value = s;
+            document.getElementById('in-l').value = l;
+            generatePalette();
+        }
+
+        // --- EVENT LISTENERS ---
+        const inputs = ['in-h', 'in-s', 'in-l', 'in-l-light', 'in-c-light', 'in-l-dark', 'in-c-dark', 'in-donut-count'];
+        inputs.forEach(id => {
+            document.getElementById(id).addEventListener('input', generatePalette);
+        });
+
+        // --- FUNCIONES MATEMÁTICAS DE COLOR ---
+        function hslToRgb(h, s, l) {
+            h /= 360; s /= 100; l /= 100;
+            let r, g, b;
+            if (s === 0) {
+                r = g = b = l;
+            } else {
+                const hue2rgb = (p, q, t) => {
+                    if (t < 0) t += 1;
+                    if (t > 1) t -= 1;
+                    if (t < 1/6) return p + (q - p) * 6 * t;
+                    if (t < 1/2) return q;
+                    if (t < 2/3) return p + (q - p) * (2/3 - t) * 6;
+                    return p;
+                };
+                const q = l < 0.5 ? l * (1 + s) : l + s - l * s;
+                const p = 2 * l - q;
+                r = hue2rgb(p, q, h + 1/3);
+                g = hue2rgb(p, q, h);
+                b = hue2rgb(p, q, h - 1/3);
+            }
+            return { r: Math.round(r * 255), g: Math.round(g * 255), b: Math.round(b * 255) };
+        }
+
+        function rgbToHsl(r, g, b) {
+            r /= 255; g /= 255; b /= 255;
+            const max = Math.max(r, g, b), min = Math.min(r, g, b);
+            let h, s, l = (max + min) / 2;
+            if (max === min) {
+                h = s = 0;
+            } else {
+                const d = max - min;
+                s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
+                switch (max) {
+                    case r: h = (g - b) / d + (g < b ? 6 : 0); break;
+                    case g: h = (b - r) / d + 2; break;
+                    case b: h = (r - g) / d + 4; break;
+                }
+                h /= 6;
+            }
+            return { h: Math.round(h * 360), s: Math.round(s * 100), l: Math.round(l * 100) };
+        }
+
+        function rgbToOklch(r, g, b) {
+            let r_l = r / 255, g_l = g / 255, b_l = b / 255;
+            r_l = r_l > 0.04045 ? Math.pow((r_l + 0.055) / 1.055, 2.4) : r_l / 12.92;
+            g_l = g_l > 0.04045 ? Math.pow((g_l + 0.055) / 1.055, 2.4) : g_l / 12.92;
+            b_l = b_l > 0.04045 ? Math.pow((b_l + 0.055) / 1.055, 2.4) : b_l / 12.92;
+
+            let l = 0.4122214708 * r_l + 0.5363325363 * g_l + 0.0514459929 * b_l;
+            let m = 0.2119034982 * r_l + 0.6806995451 * g_l + 0.1073969566 * b_l;
+            let s = 0.0883024619 * r_l + 0.2817188376 * g_l + 0.6299787005 * b_l;
+
+            let l_ = Math.cbrt(l), m_ = Math.cbrt(m), s_ = Math.cbrt(s);
+
+            let L = 0.2104542553*l_ + 0.7936177850*m_ - 0.0040720468*s_;
+            let a = 1.9779984951*l_ - 2.4285922050*m_ + 0.4505937099*s_;
+            let b_lab = 0.0259040371*l_ + 0.7827717662*m_ - 0.8086757660*s_;
+
+            let C = Math.sqrt(a*a + b_lab*b_lab);
+            let h = Math.atan2(b_lab, a) * 180 / Math.PI;
+            if (h < 0) h += 360;
+            if (Math.abs(a) < 1e-4 && Math.abs(b_lab) < 1e-4) h = 0;
+
+            return { L, C, H: h };
+        }
+
+        function oklchToRgb(L, C, h_deg) {
+            let h = h_deg * Math.PI / 180;
+            let a = C * Math.cos(h);
+            let b = C * Math.sin(h);
+
+            let l_ = L + 0.3963377774 * a + 0.2158037573 * b;
+            let m_ = L - 0.1055613458 * a - 0.0638541728 * b;
+            let s_ = L - 0.0894841775 * a - 1.2914855480 * b;
+
+            let l = l_*l_*l_, m = m_*m_*m_, s = s_*s_*s_;
+
+            let r_l = + 4.0767416621 * l - 3.3077115913 * m + 0.2309699292 * s;
+            let g_l = - 1.2684380046 * l + 2.6097574011 * m - 0.3413193965 * s;
+            let b_l = - 0.0041960863 * l - 0.7034186147 * m + 1.7076147010 * s;
+
+            let r = r_l > 0.0031308 ? 1.055 * Math.pow(r_l, 1/2.4) - 0.055 : 12.92 * r_l;
+            let g = g_l > 0.0031308 ? 1.055 * Math.pow(g_l, 1/2.4) - 0.055 : 12.92 * g_l;
+            let b_rgb = b_l > 0.0031308 ? 1.055 * Math.pow(b_l, 1/2.4) - 0.055 : 12.92 * b_l;
+
+            return {
+                r: Math.max(0, Math.min(255, Math.round(r * 255))),
+                g: Math.max(0, Math.min(255, Math.round(g * 255))),
+                b: Math.max(0, Math.min(255, Math.round(b_rgb * 255)))
+            };
+        }
+
+        function rgbToHex(r, g, b) {
+            return "#" + (1 << 24 | r << 16 | g << 8 | b).toString(16).slice(1).toUpperCase();
+        }
+
+        // --- HELPER PARA CONTRASTE WCAG ---
+        function getAccessibleTextColor(hex) {
+            hex = hex.replace('#', '');
+            const r = parseInt(hex.substring(0, 2), 16) / 255;
+            const g = parseInt(hex.substring(2, 4), 16) / 255;
+            const b = parseInt(hex.substring(4, 6), 16) / 255;
+
+            // Cálculo de Luminancia Relativa (WCAG)
+            const getLum = c => c <= 0.03928 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4);
+            const L = 0.2126 * getLum(r) + 0.7152 * getLum(g) + 0.0722 * getLum(b);
+
+            // Umbral matemático de intersección de contraste (0.179)
+            return L > 0.179 ? '#1f2937' : '#ffffff'; // Gris muy oscuro o Blanco
+        }
+
+        // --- GENERADOR SECUENCIAL (DONA: 6 PASOS) ---
+        function generateSequential6(baseHue, baseSat, isDark) {
+            const LUM_6 = isDark ? [15, 31, 47, 63, 79, 95] : [10, 26, 42, 58, 74, 90];
+            const SAT_ADJ_6 = [10, 5, 0, 0, -5, -10];
+            
+            const colors = [];
+            const strings = [];
+
+            for (let i = 0; i < 6; i++) {
+                let sCurrent = Math.max(0, Math.min(100, baseSat + SAT_ADJ_6[i]));
+                let lCurrent = LUM_6[i];
+                
+                let rgb = hslToRgb(baseHue, sCurrent, lCurrent);
+                let hex = rgbToHex(rgb.r, rgb.g, rgb.b);
+                let oklch = rgbToOklch(rgb.r, rgb.g, rgb.b);
+                
+                colors.push(hex);
+                strings.push({ 
+                    oklch: `oklch(${Math.round(oklch.L * 100)}% ${oklch.C.toFixed(2)} ${Math.round(oklch.H)})`,
+                    hsl: `hsl(${Math.round(baseHue)}, ${Math.round(sCurrent)}%, ${Math.round(lCurrent)}%)`
+                });
+            }
+            
+            const lumRange = `${LUM_6[0]}% → ${LUM_6[5]}%`;
+            const summary = `
+                <span><strong>Regla de Luz (L):</strong> Rango ${lumRange} <span class="bg-gray-200 dark:bg-gray-700 text-gray-600 dark:text-gray-300 px-1 py-0.5 rounded ml-1">Saltos: +16%</span></span>
+                <span><strong>Ajuste de Saturación (S):</strong> +10% → -10%</span>
+            `;
+
+            return { colors, strings, summary };
+        }
+
+        // --- GENERADOR SECUENCIAL (TREEMAP DRILL-DOWN: 10 PASOS) ---
+        function generateSequential10(baseHue, baseSat, isDark) {
+            const LUM_10 = isDark ? [8, 18, 28, 38, 48, 58, 68, 78, 88, 98] : [5, 15, 25, 35, 45, 55, 65, 75, 85, 95];
+            const SAT_ADJ_10 = [15, 12, 8, 4, 0, 0, -4, -8, -12, -15];
+            const colors = [];
+
+            for (let i = 0; i < 10; i++) {
+                let sCurrent = Math.max(0, Math.min(100, baseSat + SAT_ADJ_10[i]));
+                let lCurrent = LUM_10[i];
+                let rgb = hslToRgb(baseHue, sCurrent, lCurrent);
+                colors.push(rgbToHex(rgb.r, rgb.g, rgb.b));
+            }
+            return { colors };
+        }
+
+        // --- HELPER DE FILTRADO PARA LA DONA (CANTIDAD DE DATOS) ---
+        function filterDonutData(fullData, count, isDark) {
+            if (count === 0) {
+                return {
+                    colors: [isDark ? '#4b5563' : '#e5e7eb'], // Gris para Empty State
+                    strings: [{ oklch: 'Empty State', hsl: 'Sin datos' }],
+                    summary: fullData.summary,
+                    slices: [100]
+                };
+            }
+            
+            let indices = [];
+            let slices = [];
+            switch(count) {
+                case 1: 
+                    indices = [3]; // 4to color
+                    slices = [100]; 
+                    break;
+                case 2: 
+                    indices = [3, 4]; // 4to y 5to color
+                    slices = [60, 40]; 
+                    break;
+                case 3: 
+                    indices = [0, 2, 4]; // 1ro, 3ro y 5to color
+                    slices = [45, 35, 20]; 
+                    break;
+                case 4: 
+                    indices = [0, 3, 4, 5]; // 1ro, 4to, 5to y 6to color
+                    slices = [40, 30, 20, 10]; 
+                    break;
+                case 5: 
+                    indices = [0, 2, 3, 4, 5]; // 1ro, 3er, 4to, 5to y 6to color
+                    slices = [35, 25, 20, 12, 8]; 
+                    break;
+                case 6: 
+                default:
+                    indices = [0, 1, 2, 3, 4, 5]; // Todos
+                    slices = [40, 25, 15, 10, 7, 3]; 
+                    break;
+            }
+
+            return {
+                colors: indices.map(i => fullData.colors[i]),
+                strings: indices.map(i => fullData.strings[i]),
+                summary: fullData.summary,
+                slices: slices
+            };
+        }
+
+        // --- GENERADOR CUALITATIVO (TREEMAP: 8 PASOS) ---
+        function generateColorSet(seedHue, offsets, lightness, chroma) {
+            const colors = [];
+            const strings = [];
+            const rawHsl = [];
+
+            for(let i = 0; i < offsets.length; i++) {
+                let targetHue = (seedHue + offsets[i]) % 360;
+                if (targetHue < 0) targetHue += 360;
+                
+                let rgb = oklchToRgb(lightness, chroma, targetHue);
+                let hex = rgbToHex(rgb.r, rgb.g, rgb.b);
+                let hsl = rgbToHsl(rgb.r, rgb.g, rgb.b);
+                
+                colors.push(hex);
+                strings.push({ 
+                    oklch: `oklch(${Math.round(lightness * 100)}% ${chroma} ${Math.round(targetHue)})`,
+                    hsl: `hsl(${hsl.h}, ${hsl.s}%, ${hsl.l}%)`
+                });
+                rawHsl.push({h: hsl.h, s: hsl.s, l: hsl.l});
+            }
+            return { colors, strings, rawHsl };
+        }
+
+        // --- RENDERIZADO SVG DONA ---
+        function renderDonutChart(containerId, colors, bgColor, slices, strokeColor) {
+            const container = document.getElementById(containerId);
+            container.innerHTML = '';
+            
+            const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+            svg.setAttribute("viewBox", "0 0 200 200");
+            svg.setAttribute("class", "w-48 h-48"); // Sombra removida
+
+            const cx = 100, cy = 100, r = 90, innerR = 50;
+            const actualSlices = slices || [40, 25, 15, 10, 7, 3];
+            const actualStrokeColor = strokeColor || bgColor;
+            let currentAngle = -90;
+
+            actualSlices.forEach((percent, i) => {
+                if(!colors[i]) return; 
+
+                if (percent === 100) {
+                    const circle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+                    circle.setAttribute("cx", cx);
+                    circle.setAttribute("cy", cy);
+                    circle.setAttribute("r", r);
+                    circle.setAttribute("fill", colors[i]);
+                    circle.setAttribute("stroke", actualStrokeColor);
+                    circle.setAttribute("stroke-width", "3");
+                    svg.appendChild(circle);
+                    return;
+                }
+
+                const startAngle = currentAngle;
+                const endAngle = currentAngle + (percent / 100) * 360;
+                
+                const startRad = startAngle * Math.PI / 180;
+                const endRad = endAngle * Math.PI / 180;
+
+                const x1 = cx + r * Math.cos(startRad);
+                const y1 = cy + r * Math.sin(startRad);
+                const x2 = cx + r * Math.cos(endRad);
+                const y2 = cy + r * Math.sin(endRad);
+
+                const largeArc = percent > 50 ? 1 : 0;
+
+                const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
+                const d = `M ${cx} ${cy} L ${x1} ${y1} A ${r} ${r} 0 ${largeArc} 1 ${x2} ${y2} Z`;
+                
+                path.setAttribute("d", d);
+                path.setAttribute("fill", colors[i]);
+                path.setAttribute("stroke", actualStrokeColor);
+                path.setAttribute("stroke-width", "3"); 
+                path.setAttribute("stroke-linejoin", "round");
+
+                svg.appendChild(path);
+                currentAngle = endAngle;
+            });
+
+            const innerCircle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+            innerCircle.setAttribute("cx", cx);
+            innerCircle.setAttribute("cy", cy);
+            innerCircle.setAttribute("r", innerR);
+            innerCircle.setAttribute("fill", bgColor);
+            
+            // Delinear el hueco de la dona si se usa un borde de contraste
+            if (actualStrokeColor !== bgColor) {
+                innerCircle.setAttribute("stroke", actualStrokeColor);
+                innerCircle.setAttribute("stroke-width", "3");
+            }
+            
+            svg.appendChild(innerCircle);
+
+            container.appendChild(svg);
+        }
+
+        // --- RENDERIZADO SVG TREEMAP MULTI-PROPOSITO ---
+        function renderTreemap(containerId, colors, bgColor, isInteractive = false, onClickCallback = null, layout = '8') {
+            const container = document.getElementById(containerId);
+            container.innerHTML = '';
+            
+            const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+            svg.setAttribute("viewBox", "0 0 200 200");
+            svg.setAttribute("class", "w-48 h-48"); // Sombra removida
+
+            const blocks8 = [
+                {x: 0,   y: 0,   w: 100, h: 200, fs: 30},
+                {x: 100, y: 0,   w: 100, h: 100, fs: 24},
+                {x: 100, y: 100, w: 60,  h: 60,  fs: 16},
+                {x: 160, y: 100, w: 40,  h: 60,  fs: 14},
+                {x: 100, y: 160, w: 50,  h: 40,  fs: 14},
+                {x: 150, y: 160, w: 50,  h: 20,  fs: 10},
+                {x: 150, y: 180, w: 30,  h: 20,  fs: 9},
+                {x: 180, y: 180, w: 20,  h: 20,  fs: 8}
+            ];
+
+            const blocks10 = [
+                {x: 0,   y: 0,   w: 100, h: 100, fs: 24},
+                {x: 100, y: 0,   w: 100, h: 80,  fs: 20},
+                {x: 0,   y: 100, w: 60,  h: 100, fs: 18},
+                {x: 60,  y: 100, w: 40,  h: 60,  fs: 14},
+                {x: 100, y: 80,  w: 60,  h: 60,  fs: 14},
+                {x: 160, y: 80,  w: 40,  h: 80,  fs: 12},
+                {x: 100, y: 140, w: 60,  h: 30,  fs: 10},
+                {x: 60,  y: 160, w: 40,  h: 40,  fs: 10},
+                {x: 100, y: 170, w: 60,  h: 30,  fs: 9},
+                {x: 160, y: 160, w: 40,  h: 40,  fs: 9}
+            ];
+
+            const blocks = layout === '10' ? blocks10 : blocks8;
+
+            blocks.forEach((rectData, i) => {
+                if(!colors[i]) return;
+
+                const g = document.createElementNS("http://www.w3.org/2000/svg", "g");
+
+                if (isInteractive) {
+                    g.style.cursor = 'pointer';
+                    g.style.transition = 'opacity 0.2s';
+                    g.addEventListener('mouseenter', () => g.style.opacity = '0.7');
+                    g.addEventListener('mouseleave', () => g.style.opacity = '1');
+                    g.addEventListener('click', () => {
+                        if (onClickCallback) onClickCallback(i);
+                    });
+                }
+
+                const rect = document.createElementNS("http://www.w3.org/2000/svg", "rect");
+                rect.setAttribute("x", rectData.x);
+                rect.setAttribute("y", rectData.y);
+                rect.setAttribute("width", rectData.w);
+                rect.setAttribute("height", rectData.h);
+                rect.setAttribute("fill", colors[i]);
+                rect.setAttribute("stroke", bgColor);
+                rect.setAttribute("stroke-width", "3"); 
+                rect.setAttribute("stroke-linejoin", "round");
+                g.appendChild(rect);
+
+                // Calcular el color del texto de forma dinámica según WCAG
+                const textColor = getAccessibleTextColor(colors[i]);
+
+                const text = document.createElementNS("http://www.w3.org/2000/svg", "text");
+                text.setAttribute("x", rectData.x + (rectData.w / 2));
+                text.setAttribute("y", rectData.y + (rectData.h / 2));
+                text.setAttribute("text-anchor", "middle");
+                text.setAttribute("dominant-baseline", "central");
+                text.setAttribute("fill", textColor);
+                text.setAttribute("font-size", rectData.fs);
+                text.setAttribute("font-weight", "bold");
+                text.setAttribute("font-family", "sans-serif");
+                
+                // Solo aplicar text-shadow cuando el texto es blanco para evitar que el texto oscuro se vea sucio
+                const textStyle = textColor === '#ffffff' 
+                    ? "text-shadow: 0px 1px 3px rgba(0,0,0,0.6); pointer-events: none;" 
+                    : "pointer-events: none;";
+                text.setAttribute("style", textStyle); 
+                
+                text.textContent = i + 1;
+                g.appendChild(text);
+
+                svg.appendChild(g);
+            });
+
+            container.appendChild(svg);
+        }
+
+        // --- RENDERIZADO DE LEYENDAS ---
+        function renderColorList(containerId, colors, strings, textColor, isSquare = false) {
+            const container = document.getElementById(containerId);
+            container.innerHTML = '';
+            
+            colors.forEach((color, i) => {
+                const item = document.createElement('div');
+                item.className = 'flex items-center gap-3 mb-4 bg-gray-50/5 p-2 rounded-lg transition-colors hover:bg-gray-500/10';
+                
+                const swatch = document.createElement('div');
+                const shapeClass = isSquare ? 'rounded-md' : 'rounded-full';
+                // Removemos 'text-white' para controlarlo de forma dinámica
+                swatch.className = `w-10 h-10 ${shapeClass} border border-gray-400/30 shrink-0 color-swatch shadow-inner flex items-center justify-center font-bold text-xs drop-shadow-sm`;
+                swatch.style.backgroundColor = color;
+                
+                // Calcular el color del texto dinámicamente según WCAG
+                const swatchTextColor = getAccessibleTextColor(color);
+                swatch.style.color = swatchTextColor;
+                
+                // Solo aplicar text-shadow cuando el texto es blanco para evitar ensuciar el texto oscuro
+                if (swatchTextColor === '#ffffff') {
+                    swatch.style.textShadow = '0px 1px 2px rgba(0,0,0,0.5)';
+                }
+
+                swatch.innerText = i + 1;
+                
+                const textWrapper = document.createElement('div');
+                textWrapper.className = `flex flex-col overflow-hidden`;
+                textWrapper.style.color = textColor;
+                
+                const title = document.createElement('span');
+                title.className = 'font-bold text-sm tracking-wide';
+                title.innerText = color;
+                
+                const values = document.createElement('span');
+                values.className = 'opacity-70 font-mono text-[11px] mt-0.5 leading-tight break-words';
+                values.innerHTML = `${strings[i].oklch} <br class="sm:hidden" /> <span class="hidden sm:inline opacity-50 mx-1">|</span> ${strings[i].hsl}`;
+                
+                textWrapper.appendChild(title);
+                textWrapper.appendChild(values);
+                item.appendChild(swatch);
+                item.appendChild(textWrapper);
+                container.appendChild(item);
+            });
+        }
+
+        // --- MANEJADOR DRILL DOWN ---
+        function updateDrillDown(index, isDark) {
+            if (isDark) {
+                activeDrillDownIndexDark = index;
+                const base = latestQualitativeDark.rawHsl[index];
+                const seq10 = generateSequential10(base.h, base.s, true);
+                renderTreemap('dark-treemap2-container', seq10.colors, '#393C46', false, null, '10');
+                document.getElementById('dark-drilldown-label').innerHTML = `Bloque <span class="bg-gray-700 text-white px-1.5 py-0.5 rounded ml-1">${index + 1}</span> Seleccionado`;
+            } else {
+                activeDrillDownIndexLight = index;
+                const base = latestQualitativeLight.rawHsl[index];
+                const seq10 = generateSequential10(base.h, base.s, false);
+                renderTreemap('light-treemap2-container', seq10.colors, '#FFFFFF', false, null, '10');
+                document.getElementById('light-drilldown-label').innerHTML = `Bloque <span class="bg-gray-200 text-gray-800 px-1.5 py-0.5 rounded ml-1">${index + 1}</span> Seleccionado`;
+            }
+        }
+
+        // --- MOTOR PRINCIPAL ---
+        function generatePalette() {
+            const hIn = parseFloat(document.getElementById('in-h').value) || 0;
+            const sIn = parseFloat(document.getElementById('in-s').value) || 0;
+            const lIn = parseFloat(document.getElementById('in-l').value) || 0;
+
+            const baseRgb = hslToRgb(hIn, sIn, lIn);
+            const baseOklch = rgbToOklch(baseRgb.r, baseRgb.g, baseRgb.b);
+            let seedHue = baseOklch.H;
+
+            // Failsafe Acromático
+            const isAchromatic = baseOklch.C < 0.01 || lIn >= 100 || lIn <= 0;
+            const warningEl = document.getElementById('failsafe-warning');
+            
+            if (isAchromatic) {
+                seedHue = 0;
+                warningEl.classList.remove('hidden');
+            } else {
+                warningEl.classList.add('hidden');
+            }
+
+            let seqHue = isAchromatic ? 0 : hIn;
+
+            // --- CONSTANTES DE COLOR TREEMAP Y UI ---
+            const TREEMAP_L_LIGHT = parseFloat(document.getElementById('in-l-light').value) || 0;
+            const TREEMAP_C_LIGHT = parseFloat(document.getElementById('in-c-light').value) || 0; 
+            const TREEMAP_L_DARK = parseFloat(document.getElementById('in-l-dark').value) || 0;
+            const TREEMAP_C_DARK = parseFloat(document.getElementById('in-c-dark').value) || 0;
+
+            const donutCount = parseInt(document.getElementById('in-donut-count').value);
+            const validDonutCount = isNaN(donutCount) ? 6 : donutCount;
+
+            // Borde dinámico gris basado en el matiz de la marca (Siempre Activo para contraste)
+            const borderDarkRgb = hslToRgb(hIn, 10, 45);
+            const darkStrokeColor = rgbToHex(borderDarkRgb.r, borderDarkRgb.g, borderDarkRgb.b);
+
+            // 1. Generar sets usando la Fórmula Secuencial (Para la Dona)
+            const light6 = generateSequential6(seqHue, sIn, false);
+            const dark6 = generateSequential6(seqHue, sIn, true);
+
+            const filteredLightDonut = filterDonutData(light6, validDonutCount, false);
+            const filteredDarkDonut = filterDonutData(dark6, validDonutCount, true);
+
+            // --- DETECCIÓN DE TEMPERATURA ---
+            const isWarmBrand = (hIn >= 0 && hIn <= 90) || (hIn >= 300 && hIn <= 360);
+            
+            const tempBadge = document.getElementById('brand-temp-badge');
+            if (tempBadge) {
+                if (isWarmBrand) {
+                    tempBadge.innerText = 'Cálido';
+                    tempBadge.className = 'mt-1 w-max text-[8px] px-1.5 py-0.5 rounded bg-orange-100 text-orange-700 font-bold uppercase tracking-wider';
+                } else {
+                    tempBadge.innerText = 'Frío';
+                    tempBadge.className = 'mt-1 w-max text-[8px] px-1.5 py-0.5 rounded bg-blue-100 text-blue-700 font-bold uppercase tracking-wider';
+                }
+            }
+
+            // 2. TREEMAP: Motor Cualitativo (Semilla Inteligente Condicional)
+            let seedHueTreemap;
+            let treemapSummaryText;
+
+            // Secuencia de saltos asimétricos para mostrar en la leyenda
+            const jumpsText = HUE_OFFSETS_8.map(j => `+${j}°`).join(', ');
+
+            if (isWarmBrand) {
+                // Marca Cálida -> Análogo frío más cercano (salto corto positivo)
+                seedHueTreemap = (seedHue + 35) % 360;
+                treemapSummaryText = `
+                    <span class="shrink-0"><strong>Semilla Derivada:</strong> Análogo Frío Cercano <span class="bg-gray-200 dark:bg-gray-700 text-gray-600 dark:text-gray-300 px-1 py-0.5 rounded ml-1">Salto: +35°</span></span>
+                    <span class="text-left sm:text-right" title="${jumpsText}"><strong>Saltos Asimétricos:</strong> ${jumpsText}</span>
+                `;
+            } else {
+                // Marca Fría -> Análogo cálido más cercano (salto corto negativo)
+                seedHueTreemap = (seedHue - 35 + 360) % 360;
+                treemapSummaryText = `
+                    <span class="shrink-0"><strong>Semilla Derivada:</strong> Análogo Cálido Cercano <span class="bg-gray-200 dark:bg-gray-700 text-gray-600 dark:text-gray-300 px-1 py-0.5 rounded ml-1">Salto: -35°</span></span>
+                    <span class="text-left sm:text-right" title="${jumpsText}"><strong>Saltos Asimétricos:</strong> ${jumpsText}</span>
+                `;
+            }
+
+            const light8_treemap = generateColorSet(seedHueTreemap, HUE_OFFSETS_8, TREEMAP_L_LIGHT, TREEMAP_C_LIGHT);
+            const dark8_treemap = generateColorSet(seedHueTreemap, HUE_OFFSETS_8, TREEMAP_L_DARK, TREEMAP_C_DARK);
+
+            // Almacenar el estado global de los Treemap cualitativos para su uso en el Drill-down
+            latestQualitativeLight = light8_treemap;
+            latestQualitativeDark = dark8_treemap;
+
+            // --- RENDERIZADO MODO CLARO (#FFFFFF) ---
+            renderDonutChart('light-chart-container', filteredLightDonut.colors, '#FFFFFF', filteredLightDonut.slices);
+            document.getElementById('light-donut-summary').innerHTML = filteredLightDonut.summary;
+            renderColorList('light-list', filteredLightDonut.colors, filteredLightDonut.strings, '#1f2937');
+            
+            // Treemap Cualitativo con Callback Interactivo
+            renderTreemap('light-treemap-container', light8_treemap.colors, '#FFFFFF', true, (idx) => updateDrillDown(idx, false), '8');
+            document.getElementById('light-treemap-summary').innerHTML = treemapSummaryText;
+            renderColorList('light-treemap-list', light8_treemap.colors, light8_treemap.strings, '#1f2937', true);
+
+            // --- RENDERIZADO MODO OSCURO (#393C46) ---
+            renderDonutChart('dark-chart-container', filteredDarkDonut.colors, '#393C46', filteredDarkDonut.slices, darkStrokeColor);
+            document.getElementById('dark-donut-summary').innerHTML = filteredDarkDonut.summary;
+            renderColorList('dark-list', filteredDarkDonut.colors, filteredDarkDonut.strings, '#f3f4f6');
+            
+            // Treemap Cualitativo con Callback Interactivo
+            renderTreemap('dark-treemap-container', dark8_treemap.colors, '#393C46', true, (idx) => updateDrillDown(idx, true), '8');
+            document.getElementById('dark-treemap-summary').innerHTML = treemapSummaryText;
+            renderColorList('dark-treemap-list', dark8_treemap.colors, dark8_treemap.strings, '#f3f4f6', true);
+
+            // Inicializar el estado de los Treemap Secuenciales
+            updateDrillDown(activeDrillDownIndexLight, false);
+            updateDrillDown(activeDrillDownIndexDark, true);
+        }
+
+        // Auto-generar al cargar la página
+        window.onload = generatePalette;
+
+    </script>
+</body>
+</html>
