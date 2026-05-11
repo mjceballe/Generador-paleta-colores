@@ -29,6 +29,15 @@
         .card-button:hover .icon-container {
             transform: scale(1.1);
         }
+
+        .banner-docs {
+            transition: all 0.2s ease;
+        }
+
+        .banner-docs:hover {
+            background-color: #f1f5f9;
+            border-color: #cbd5e1;
+        }
     </style>
 </head>
 <body class="min-h-screen flex items-center justify-center p-6">
@@ -39,7 +48,7 @@
             <p class="text-slate-600 text-lg">Selecciona el tipo de paleta que deseas explorar para tu proyecto.</p>
         </header>
 
-        <div class="grid md:grid-cols-2 gap-8">
+        <div class="grid md:grid-cols-2 gap-8 mb-10">
             <!-- Tarjeta: Colores Cualitativos -->
             <a href="colores-cualitativos.html" class="card-button group bg-white border border-slate-200 rounded-3xl p-8 flex flex-col items-center text-center">
                 <div class="icon-container w-24 h-24 bg-indigo-50 rounded-2xl flex items-center justify-center mb-6">
@@ -55,12 +64,11 @@
                 <p class="text-slate-500 leading-relaxed">
                     Diseñados para datos categóricos donde no existe un orden intrínseco. Diferencia elementos de forma clara.
                 </p>
-                <!-- CTA Actualizado -->
                 <span class="mt-6 font-semibold text-indigo-600 group-hover:underline">Ver generador &rarr;</span>
             </a>
 
             <!-- Tarjeta: Colores Secuenciales -->
-            <a href="colores-secuenciales.html" class="card-button group bg-white border border-slate-200 rounded-3xl p-8 flex flex-col items-center text-center">
+            <a href="colores.secuenciales.html" class="card-button group bg-white border border-slate-200 rounded-3xl p-8 flex flex-col items-center text-center">
                 <div class="icon-container w-24 h-24 bg-emerald-50 rounded-2xl flex items-center justify-center mb-6">
                     <!-- Icono Secuencial -->
                     <svg width="60" height="60" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -74,13 +82,25 @@
                 <p class="text-slate-500 leading-relaxed">
                     Ideales para representar datos numéricos ordenados o progresiones de intensidad y valor.
                 </p>
-                <!-- CTA Actualizado -->
                 <span class="mt-6 font-semibold text-emerald-600 group-hover:underline">Ver generador &rarr;</span>
             </a>
         </div>
 
-        <footer class="mt-16 text-center text-slate-400 text-sm">
-            Haga clic en una tarjeta para navegar a la sección correspondiente.
+        <!-- Banner de Recurso Técnico -->
+        <div class="flex justify-center">
+            <a href="doc.html" class="banner-docs flex items-center gap-4 px-6 py-4 bg-white border border-slate-200 rounded-2xl text-slate-600 hover:text-indigo-600 transition-all w-full sm:w-auto shadow-sm">
+                <div class="p-2 bg-slate-100 rounded-lg group-hover:bg-indigo-50">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-slate-500 group-hover:text-indigo-500">
+                        <polyline points="16 18 22 12 16 6"></polyline>
+                        <polyline points="8 6 2 12 8 18"></polyline>
+                    </svg>
+                </div>
+                <span class="text-sm font-medium">Recurso técnico: <span class="underline decoration-slate-300 underline-offset-4 group-hover:decoration-indigo-300">Guía de implementación y documentación</span></span>
+            </a>
+        </div>
+
+        <footer class="mt-12 text-center text-slate-400 text-sm">
+            Selecciona una opción para comenzar a trabajar con las paletas.
         </footer>
     </div>
 
